@@ -1,0 +1,2 @@
+0 0 * * 0 /usr/local/bin/electrumx_init update >> /var/log/electrumx_update.log
+

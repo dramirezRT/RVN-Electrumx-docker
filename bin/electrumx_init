@@ -1,0 +1,51 @@
+#!/bin/bash
+
+init () {
+    if [ ! -f ${SSL_CERTFILE} ] || [ ! -f ${SSL_KEYFILE} ]; then
+        openssl req -newkey rsa:2048 -sha256 -nodes -x509 -days 365 -subj "/O=ElectrumX" -keyout "${SSL_KEYFILE}" -out "${SSL_CERTFILE}"
+    fi
+
+    exec /usr/local/bin/electrumx_server
+}
+
+install () {
+    LATEST_VER=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/latest" | jq -r .tag_name)
+
+    DOWN_URL=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/latest" | jq -r .tarball_url)
+
+    wget $DOWN_URL && tar xvf $LATEST_VER && mv ./Electrum-RVN*/* .
+
+    rm -f ${SSL_CERTFILE} ${SSL_KEYFILE}
+
+    python3 -m pip install -r requirements.txt
+
+    python3 setup.py install --force --record installed_files.txt
+
+}
+
+update () {
+    echo "Looking for the latest version..."
+    electrumx_dir=/electrum-rvn-server/
+    LATEST_VER=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/latest" | jq -r .tag_name)
+    if [ ! -f $LATEST_VER ]; then
+        echo "New version found!"
+        cd $electrumx_dir
+        old_version=$(ls v*)
+        DOWN_URL=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/latest" | jq -r .tarball_url)
+        wget $DOWN_URL && tar xvf $LATEST_VER && mv ./Electrum-RVN*/* .
+
+        echo "Stopping electrum server..."
+        es_pid=$(pgrep electrumx_server)
+        kill -2 $es_pid
+
+        python3 setup.py install --force --record installed_files.txt
+
+        echo "Removing old version"
+        rm -rf $old_version
+
+        echo "Restarting the server..."
+        init
+    fi
+}
+
+$1

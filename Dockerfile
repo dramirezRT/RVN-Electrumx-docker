@@ -18,7 +18,8 @@ RUN apt-get update \
         curl \
         jq \
         wget \
-        cron \
+        less \
+        nano \
     && rm -rf /var/lib/apt/lists/* \
     && ln -sf /usr/bin/python3.8 /usr/bin/python3
 
@@ -26,12 +27,6 @@ WORKDIR /electrum-rvn-server
 COPY ./bin/electrumx_init /usr/local/bin/electrumx_init
 RUN chmod +x /usr/local/bin/electrumx_init \
     && /usr/local/bin/electrumx_init install
-
-COPY ./files/electrumx /etc/cron.d/electrumx
-RUN chmod 0644 /etc/cron.d/electrumx \
-    && touch electrumx_update.log \
-    && ln -s /electrum-rvn-server/electrumx_update.log /var/log/electrumx_update.log \
-    && crontab /etc/cron.d/electrumx
 
 # For the full list of Environment variables check - https://github.com/Electrum-RVN-SIG/electrumx-ravencoin/blob/master/docs/environment.rst
 VOLUME ["/electrum-data"]
@@ -51,5 +46,5 @@ ENV BANDWIDTH_UNIT_COST 1000
 EXPOSE 50001 50002 50004 8000
 
 
-CMD ["bash", "-c", "cron", "&&", "electrumx_init", "init"]
+CMD ["/bin/bash", "-c", "electrumx_init init"]
 

@@ -23,29 +23,4 @@ install () {
 
 }
 
-update () {
-    echo "Looking for the latest version..."
-    electrumx_dir=/electrum-rvn-server/
-    LATEST_VER=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/latest" | jq -r .tag_name)
-    if [ ! -f $LATEST_VER ]; then
-        echo "New version found!"
-        cd $electrumx_dir
-        old_version=$(ls v*)
-        DOWN_URL=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/latest" | jq -r .tarball_url)
-        wget $DOWN_URL && tar xvf $LATEST_VER && mv ./Electrum-RVN*/* .
-
-        echo "Stopping electrum server..."
-        es_pid=$(pgrep electrumx_server)
-        kill -2 $es_pid
-
-        python3 setup.py install --force --record installed_files.txt
-
-        echo "Removing old version"
-        rm -rf $old_version
-
-        echo "Restarting the server..."
-        init
-    fi
-}
-
 $1

@@ -6,7 +6,14 @@ Updated images can be  found in the Docker Hub Repository [https://hub.docker.co
 
 ## Prerequisites
 - Have access to a Raven Core Node (user and password, for RPC calls)
-- Docker Engine
+- Docker Engine installed
+- The following directory tree under the root filesystem "/"
+1. /electrum-data
+2. /electrum-data/db
+3. /electrum-data/ssl_cert
+
+Can be created with:
+`sudo mkdir -p /electrum-data/db /electrum-data/ssl_cert`
 
 ## Usage
 

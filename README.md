@@ -31,4 +31,4 @@ docker run  -d \
             --name rvn-electrumx-server
             dramirezrt/ravencoin-electrumx-server
   
-For a full list of environment variables check (https://electrumx-ravencoin.readthedocs.io/en/latest/environment.html)[https://electrumx-ravencoin.readthedocs.io/en/latest/environment.html]
+For a full list of environment variables check [https://electrumx-ravencoin.readthedocs.io/en/latest/environment.html](https://electrumx-ravencoin.readthedocs.io/en/latest/environment.html)

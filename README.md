@@ -30,7 +30,7 @@ docker run  -d \
             dramirezrt/ravencoin-electrumx-server
 ```
   
-## Example
+## Example 1
 
 ```
 docker run  -d \                                      
@@ -41,5 +41,21 @@ docker run  -d \
             --name rvn-electrumx-server \
             dramirezrt/ravencoin-electrumx-server
 ```
+## Example 2
+```
+docker run  -d \                                      
+            -v /electrum-data/:/electrum-data \
+            -e DAEMON_URL="http://username:password@localhost" \
+            -p 50002:50002 \
+            -e SERVICES="tcp://:50001,ssl://:50002" \
+            -e REPORT_SERVICES="tcp://sv.usebsv.com:50001,ssl://sv.usebsv.com:50002"
+            --name rvn-electrumx-server \
+            dramirezrt/ravencoin-electrumx-server
+```
+
   
 For a full list of environment variables check [https://electrumx-ravencoin.readthedocs.io/en/latest/environment.html](https://electrumx-ravencoin.readthedocs.io/en/latest/environment.html)
+
+
+### Donations
+RVN address: RWypyDyfiyiVmN5weG1x9xrBHtND9RsGzC

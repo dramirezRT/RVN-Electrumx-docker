@@ -25,6 +25,8 @@ RUN apt-get update \
 
 WORKDIR /electrum-rvn-server
 COPY ./bin/electrumx_init /usr/local/bin/electrumx_init
+ENV TAG latest
+#ENV TAG v1.9
 RUN chmod +x /usr/local/bin/electrumx_init \
     && /usr/local/bin/electrumx_init install
 
@@ -33,7 +35,7 @@ VOLUME ["/electrum-data"]
 ENV ED_DIR              /electrum-data
 ENV DB_DIRECTORY        /electrum-data/db
 ENV DAEMON_URL          "http://username:password@hostname:port/"
-ENV COIN Ravencoin
+ENV COIN                Ravencoin
 ENV SERVICES            "tcp://:50001,ssl://:50002,wss://:50004,rpc://0.0.0.0:8000"
 ENV SSL_CERTFILE        ${ED_DIR}/ssl_cert/electrumx.crt
 ENV SSL_KEYFILE         ${ED_DIR}/ssl_cert/electrumx.key

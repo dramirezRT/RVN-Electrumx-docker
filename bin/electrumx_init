@@ -9,11 +9,17 @@ init () {
 }
 
 install () {
-    LATEST_VER=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/latest" | jq -r .tag_name)
+    if [[ -z ${TAG} ]] || [[ ${TAG} == "latest" ]]; then
+        VERSION=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/latest" | jq -r .tag_name)
+        DOWN_URL=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/latest" | jq -r .tarball_url)
+        echo "Pulling latest release"
+    else
+        VERSION=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/tags/${TAG}" | jq -r .tag_name)
+        DOWN_URL=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/tags/${TAG}" | jq -r .tarball_url)
+        echo "Pulling release ${TAG}"
+    fi
 
-    DOWN_URL=$(curl --silent "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/latest" | jq -r .tarball_url)
-
-    wget $DOWN_URL && tar xvf $LATEST_VER && mv ./Electrum-RVN*/* .
+    wget $DOWN_URL && tar xvf $VERSION && mv ./Electrum-RVN*/* .
 
     rm -f ${SSL_CERTFILE} ${SSL_KEYFILE}
 

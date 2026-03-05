@@ -27,7 +27,9 @@ Updated images can be found in the Docker Hub Repository [https://hub.docker.com
 
 ## Prerequisites
 
-- Have access to a Raven Core Node (user and password, for RPC calls)
+- Have access to a Raven Core Node with:
+  - RPC credentials configured (`rpcuser` and `rpcpassword` in `raven.conf`)
+  - REST interface enabled (`rest=1` in `raven.conf`)
 - Docker Engine installed
 - The following directory tree under the root filesystem "/"
   1. /electrum-data

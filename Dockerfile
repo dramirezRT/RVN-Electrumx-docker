@@ -33,7 +33,7 @@ ENV TAG=${TAG}
 RUN chmod +x /usr/local/bin/electrumx_init \
     && /usr/local/bin/electrumx_init install \
     && python3 /tmp/patches/fix-aiohttp-basic-auth.py /electrum-rvn-server/electrumx/server/daemon.py \
-    && python3 setup.py install --force --record installed_files.txt \
+    && pip3 install --no-deps --force-reinstall . \
     && rm -rf /tmp/patches
 
 # For the full list of Environment variables check:

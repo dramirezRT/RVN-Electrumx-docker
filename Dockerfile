@@ -25,12 +25,15 @@ RUN apt-get update \
 WORKDIR /electrum-rvn-server
 
 COPY ./bin/electrumx_init /usr/local/bin/electrumx_init
+COPY ./patches/ /tmp/patches/
 
 ARG TAG=latest
 ENV TAG=${TAG}
 
 RUN chmod +x /usr/local/bin/electrumx_init \
-    && /usr/local/bin/electrumx_init install
+    && /usr/local/bin/electrumx_init install \
+    && python3 /tmp/patches/fix-aiohttp-basic-auth.py /electrum-rvn-server/electrumx/server/daemon.py \
+    && rm -rf /tmp/patches
 
 # For the full list of Environment variables check:
 # https://electrumx-ravencoin.readthedocs.io/en/latest/environment.html

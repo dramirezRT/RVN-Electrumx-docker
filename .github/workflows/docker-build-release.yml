@@ -1,0 +1,113 @@
+name: Build, Push & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-and-push:
+    # Only run on tag pushes that land on main
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is on main branch
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor ${{ github.sha }} origin/main; then
+            echo "::error::Tag must be on the main branch"
+            exit 1
+          fi
+
+      - name: Extract version from tag
+        id: meta
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: dramirezrt
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          build-args: TAG=${{ steps.meta.outputs.tag }}
+          tags: |
+            dramirezrt/ravencoin-electrumx-server:${{ steps.meta.outputs.tag }}
+            dramirezrt/ravencoin-electrumx-server:latest
+          labels: |
+            org.opencontainers.image.title=Ravencoin ElectrumX Server
+            org.opencontainers.image.description=ElectrumX server for the Ravencoin network
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+            org.opencontainers.image.source=https://github.com/dramirezRT/RVN-Electrumx-docker
+            org.opencontainers.image.upstream=https://github.com/Electrum-RVN-SIG/electrumx-ravencoin
+
+      - name: Fetch upstream release notes
+        id: upstream
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          BODY=$(curl -sf "https://api.github.com/repos/Electrum-RVN-SIG/electrumx-ravencoin/releases/tags/${TAG}" \
+            | jq -r '.body // empty' 2>/dev/null || true)
+
+          {
+            echo "notes<<RELEASE_EOF"
+            echo "## Docker Image"
+            echo ""
+            echo "\`\`\`"
+            echo "docker pull dramirezrt/ravencoin-electrumx-server:${TAG}"
+            echo "\`\`\`"
+            echo ""
+            echo "### Docker Image Changes"
+            echo "- Base image: Ubuntu 22.04 LTS"
+            echo "- Python: 3.10"
+            echo "- ElectrumX Ravencoin: ${TAG}"
+            echo ""
+            if [ -n "$BODY" ]; then
+              echo "### Upstream ElectrumX Changes"
+              echo ""
+              echo "$BODY"
+              echo ""
+            fi
+            echo "---"
+            echo ""
+            echo "**Full upstream release:** https://github.com/Electrum-RVN-SIG/electrumx-ravencoin/releases/tag/${TAG}"
+            echo "RELEASE_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ElectrumX Ravencoin Server ${{ steps.meta.outputs.tag }}
+          body: ${{ steps.upstream.outputs.notes }}
+          draft: false
+          prerelease: false
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: dramirezrt
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          repository: dramirezrt/ravencoin-electrumx-server
+          readme-filepath: ./README.md

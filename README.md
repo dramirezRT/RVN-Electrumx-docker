@@ -27,9 +27,9 @@ Updated images can be found in the Docker Hub Repository [https://hub.docker.com
 
 ## Prerequisites
 
-- Have access to a Raven Core Node with:
-  - RPC credentials configured (`rpcuser` and `rpcpassword` in `raven.conf`)
-  - REST interface enabled (`rest=1` in `raven.conf`)
+- Have access to a Raven Core Node with the following in `raven.conf`:
+  - `rpcuser` and `rpcpassword` configured
+  - `# rest=1` — Enable if running an ElectrumX server. ElectrumX uses the REST API for block downloads. Without it, block syncing will fail with "Not Found" errors.
 - Docker Engine installed
 - The following directory tree under the root filesystem "/"
   1. /electrum-data

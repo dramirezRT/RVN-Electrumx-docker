@@ -29,7 +29,7 @@ Updated images can be found in the Docker Hub Repository [https://hub.docker.com
 
 - Have access to a Raven Core Node with the following in `raven.conf`:
   - `rpcuser` and `rpcpassword` configured
-  - `# rest=1` — Enable if running an ElectrumX server. ElectrumX uses the REST API for block downloads. Without it, block syncing will fail with "Not Found" errors.
+  - `rest=1` — **Must NOT be commented out.** Enable this if running an ElectrumX server. ElectrumX uses the REST API for block downloads. Without it, block syncing will fail with "Not Found" errors.
 - Docker Engine installed
 - The following directory tree under the root filesystem "/"
   1. /electrum-data
@@ -109,6 +109,16 @@ docker run -d \
 ```
 
 For a full list of environment variables check [https://electrumx-ravencoin.readthedocs.io/en/latest/environment.html](https://electrumx-ravencoin.readthedocs.io/en/latest/environment.html)
+
+## Logging
+
+ElectrumX logs are written to `/electrum-data/electrumx.log` inside the container. This maps to your host mount path (e.g., `/home/raven/electrum-data/electrumx.log`).
+
+- Log output is configured via shell redirection (`tee`) in the container entrypoint — not via an environment variable
+- To view logs:
+  - `docker logs rvn-electrumx-server`
+  - `tail -f /your-mount/electrumx.log`
+- **Note:** No logrotate is configured by default. Monitor the log file size if running long-term.
 
 ### Donations
 
